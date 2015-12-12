@@ -66,11 +66,11 @@ def ngram_distribution(text, order):
     """
     length = len(text) + 1 - order
 
-    ngrams = [
+    ngram_frequencies = coll.Counter([
         ''.join(tup) for tup in zip(*[text[i:length+i] for i in range(order)])
-    ]
+    ])
 
-    return {c: val/length for c, val in coll.Counter(ngrams).items()}
+    return {c: val/length for c, val in ngram_frequencies.items()}
 
 
 def monogram_distribution(text):
@@ -307,11 +307,24 @@ def kasiski_examination(text, limit=30):
 
 def permute_block(text_block, permutation, inv=False):
     """
-    Permute text block with length equal to permutation length with regard to
-    that permutation. This is a helper function for :func:`permute` function.
+    Permute text block with regard to given permutation.
+
+    `text_block` length must be equal or less than `permutation` length. This is
+    a helper function for :func:`permute` function.
+
+    :param text_block: text block to be permuted
+    :type text_block: str
+    :param permutation: permutation
+    :type permutation: list of int
+    :param inv: flag determining whether given permutation is the permutation
+        with regard to `text_block` should be permuted or its inverse
+    :return: permuted text block
+    :rtype: str
     """
     q, n = len(text_block), len(permutation)
-    assert(q <= n), "Text block too long!"
+    if q > n:
+        raise ValueError("Text block length should be equal or less than "
+                         "permutation length")
 
     inverse_permutation = permutation if inv else inverse(permutation)
 
@@ -330,11 +343,11 @@ def permute(text, permutation):
     Encrypt text using transposition block cipher with key given as
     `permutation`.
 
-    :param text: text to be encrypted
+    :param text: text to be permuted
     :type text: str
-    :param permutation: key (permutation)
+    :param permutation: permutation
     :type permutation: list of int
-    :return: encrypted text
+    :return: permuted text
     :rtype: str
 
     >>> permute('abcde', [2,3,1,0,4])
@@ -374,24 +387,3 @@ def inverse(permutation):
     np.put(inv, permutation, np.arange(len(permutation)))
 
     return list(inv)
-
-
-def consistency(permutation_a, permutation_b):
-    """
-    Compute consistency index of two permutations defined as amount of indexes
-    which "neighbours" are the same in both permutations.
-
-    :param permutation_a: list of unique integers
-    :param permutation_b: list of unique integers
-    :return: consistency index
-    :rtype: int
-    """
-    size = len(permutation_a)
-
-    count = 0
-    for i in range(size):
-        ix = permutation_b.index(permutation_a[i])
-        count += permutation_a[(i-1) % size] == permutation_b[(ix-1) % size] \
-            and permutation_a[(i+1) % size] == permutation_b[(ix+1) % size]
-
-    return count
