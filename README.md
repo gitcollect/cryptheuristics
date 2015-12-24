@@ -4,6 +4,7 @@ Heuristic Methods of Cryptanalysis repo
 ## TODO
 * test kasiski_examination and add examples
 * improve documentation in evaluators module
+* repair selection methods to work with new `Solution` classes
 
 ## Docs compilation
 
